@@ -1,20 +1,36 @@
 const mongoose = require('mongoose');
-const Card = require('../models/card');
+const Movie = require('../models/movie');
 const { ERROR_CODE } = require('../utils/constants');
 const BadRequestError = require('../errors/BadRequestError');
 const ForbiddenError = require('../errors/ForbiddenError');
 const NotFoundError = require('../errors/NotFoundError');
 
-const getCards = (req, res, next) => {
-  Card.find({})
-    .then((cards) => res.send(cards))
+const getMovies = (req, res, next) => {
+  Movie.find({ owner: req.user._id })
+    .then((movies) => res.send(movies))
     .catch(next);
 };
 
 const createCard = (req, res, next) => {
-  const { name, link } = req.body;
+  const {
+    country, director, duration, year, description, image,
+    trailerLink, thumbnail, movieId, nameRU, nameEN,
+  } = req.body;
   const owner = req.user._id;
-  Card.create({ name, link, owner })
+  Movie.create({
+    country,
+    director,
+    duration,
+    year,
+    description,
+    image,
+    trailerLink,
+    thumbnail,
+    movieId,
+    nameRU,
+    nameEN,
+    owner,
+  })
     .then((card) => res.status(ERROR_CODE.CREATED).send(card))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
@@ -29,7 +45,7 @@ const createCard = (req, res, next) => {
 };
 
 const deleteCard = (req, res, next) => {
-  Card.findById(req.params.cardId)
+  Movie.findById(req.params.cardId)
     .orFail(() => {
       throw new NotFoundError('Карточка не найдена');
     })
@@ -57,7 +73,7 @@ const deleteCard = (req, res, next) => {
 
 const likeCard = (req, res, next) => {
   const likeMethod = req.method === 'PUT' ? '$addToSet' : '$pull';
-  Card.findByIdAndUpdate(
+  Movie.findByIdAndUpdate(
     req.params.cardId,
     { [likeMethod]: { likes: req.user._id } },
     { new: true },
@@ -79,7 +95,7 @@ const likeCard = (req, res, next) => {
 };
 
 module.exports = {
-  getCards,
+  getMovies,
   createCard,
   deleteCard,
   likeCard,

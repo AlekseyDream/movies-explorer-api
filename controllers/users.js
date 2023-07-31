@@ -9,14 +9,8 @@ const NotFoundError = require('../errors/NotFoundError');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-const getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => res.send(users))
-    .catch(next);
-};
-
 const getUserById = (req, res, next) => {
-  User.findById(req.params.userId ? req.params.userId : req.user._id)
+  User.findById(req.user._id)
     .orFail(() => next(new NotFoundError('NotFound')))
     .then((user) => res.send(user))
     .catch((err) => {
@@ -29,21 +23,17 @@ const getUserById = (req, res, next) => {
 
 const createUser = (req, res, next) => {
   const {
-    name, about, avatar, password, email,
+    name, password, email,
   } = req.body;
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name,
-      about,
-      avatar,
       password: hash,
       email,
     }))
     .then((user) => {
       res.status(ERROR_CODE.CREATED).send({
         name: user.name,
-        about: user.about,
-        avatar: user.avatar,
         email: user.email,
       });
     })
@@ -65,10 +55,10 @@ const createUser = (req, res, next) => {
 };
 
 const updateUser = (req, res, next) => {
-  const { name, about } = req.body;
+  const { name, email } = req.body;
   return User.findByIdAndUpdate(
     req.user._id,
-    { name, about },
+    { name, email },
     { new: true, runValidators: true },
   )
     .then((user) => res.send(user))
@@ -77,26 +67,6 @@ const updateUser = (req, res, next) => {
         return next(
           new BadRequestError(
             'Некорректные данные при обновлении профиля',
-          ),
-        );
-      }
-      return next(err);
-    });
-};
-
-const updateUserAvatar = (req, res, next) => {
-  const { avatar } = req.body;
-  return User.findByIdAndUpdate(
-    req.user._id,
-    { avatar },
-    { new: true, runValidators: true },
-  )
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        return next(
-          new BadRequestError(
-            'Некорректные данные при обновлении аватара',
           ),
         );
       }
@@ -122,10 +92,8 @@ const login = (req, res, next) => {
 };
 
 module.exports = {
-  getUsers,
   getUserById,
   createUser,
   updateUser,
-  updateUserAvatar,
   login,
 };
