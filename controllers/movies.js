@@ -11,7 +11,7 @@ const getMovies = (req, res, next) => {
     .catch(next);
 };
 
-const createCard = (req, res, next) => {
+const createMovie = (req, res, next) => {
   const {
     country, director, duration, year, description, image,
     trailerLink, thumbnail, movieId, nameRU, nameEN,
@@ -31,7 +31,7 @@ const createCard = (req, res, next) => {
     nameEN,
     owner,
   })
-    .then((card) => res.status(ERROR_CODE.CREATED).send(card))
+    .then((movie) => res.status(ERROR_CODE.CREATED).send(movie))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
         return next(
@@ -44,16 +44,16 @@ const createCard = (req, res, next) => {
     });
 };
 
-const deleteCard = (req, res, next) => {
-  Movie.findById(req.params.cardId)
+const deleteMovie = (req, res, next) => {
+  Movie.findById(req.params.movieId)
     .orFail(() => {
       throw new NotFoundError('Карточка не найдена');
     })
-    .then((card) => {
-      if (card.owner.toString() !== req.user._id.toString()) {
+    .then((movie) => {
+      if (movie.owner.toString() !== req.user._id.toString()) {
         throw new ForbiddenError('Недопустимая операция');
       }
-      card.deleteOne()
+      movie.deleteOne()
         .then(() => {
           res.status(ERROR_CODE.OK).send({ message: 'Карточка удалена' });
         })
@@ -71,32 +71,8 @@ const deleteCard = (req, res, next) => {
     });
 };
 
-const likeCard = (req, res, next) => {
-  const likeMethod = req.method === 'PUT' ? '$addToSet' : '$pull';
-  Movie.findByIdAndUpdate(
-    req.params.cardId,
-    { [likeMethod]: { likes: req.user._id } },
-    { new: true },
-  )
-    .then((card) => {
-      if (!card) {
-        throw new NotFoundError('Карточка не найдена');
-      }
-      return res.send(card);
-    })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        return next(
-          new BadRequestError('Передан несуществующий id карточки'),
-        );
-      }
-      return next(err);
-    });
-};
-
 module.exports = {
   getMovies,
-  createCard,
-  deleteCard,
-  likeCard,
+  createMovie,
+  deleteMovie,
 };
