@@ -36,7 +36,7 @@ const createMovie = (req, res, next) => {
       if (err instanceof mongoose.Error.ValidationError) {
         return next(
           new BadRequestError(
-            'Некорректные данные при создании карточки',
+            'Некорректные данные при создании карточки фильма',
           ),
         );
       }
@@ -47,7 +47,7 @@ const createMovie = (req, res, next) => {
 const deleteMovie = (req, res, next) => {
   Movie.findById(req.params.movieId)
     .orFail(() => {
-      throw new NotFoundError('Карточка не найдена');
+      throw new NotFoundError('Фильм не найден');
     })
     .then((movie) => {
       if (movie.owner.toString() !== req.user._id.toString()) {
@@ -55,7 +55,7 @@ const deleteMovie = (req, res, next) => {
       }
       movie.deleteOne()
         .then(() => {
-          res.status(ERROR_CODE.OK).send({ message: 'Карточка удалена' });
+          res.status(ERROR_CODE.OK).send({ message: 'Фильм не найден' });
         })
         .catch(next);
     })
@@ -63,7 +63,7 @@ const deleteMovie = (req, res, next) => {
       if (err instanceof mongoose.Error.CastError) {
         return next(
           new BadRequestError(
-            'Некорректные данные при удалении карточки',
+            'Некорректные данные при удалении карточки фильма',
           ),
         );
       }
