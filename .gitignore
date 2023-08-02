@@ -3,9 +3,6 @@ logs
 *.log
 npm-debug.log*
 
-# Dependency directory
-node_modules
-
 # Optional npm cache directory
 .npm
 
@@ -24,7 +21,7 @@ node_modules
 
 # production
 
-/frontend/build
+/build
 
 # misc
 .DS_Store
