@@ -1,2 +1,4 @@
 # movies-explorer-api
-backend
+IP 51.250.93.244
+
+Backend https://api.dream.movie.nomoreparties.co
