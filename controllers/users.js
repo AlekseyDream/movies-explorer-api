@@ -88,9 +88,21 @@ const login = (req, res, next) => {
     .catch(next);
 };
 
+const logout = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        return next(new NotFoundError(ERROR_MESSAGE.USER_NOT_FOUND));
+      }
+      return res.clearCookie('jwt').send(ERROR_MESSAGE.GOODBYE);
+    })
+    .catch(next);
+};
+
 module.exports = {
   getUserById,
   createUser,
   updateUser,
   login,
+  logout,
 };
