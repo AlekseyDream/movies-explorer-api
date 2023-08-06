@@ -62,6 +62,7 @@ const updateUser = (req, res, next) => {
     { name, email },
     { new: true, runValidators: true },
   )
+    .orFail(() => next(new NotFoundError('NotFound')))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
@@ -77,7 +78,6 @@ const updateUser = (req, res, next) => {
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
