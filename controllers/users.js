@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const User = require('../models/user');
 const { jwtKey } = require('../utils/config');
-const { ERROR_CODE } = require('../utils/constants');
+const { ERROR_CODE, ERROR_MESSAGE } = require('../utils/constants');
 const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
 const NotFoundError = require('../errors/NotFoundError');
@@ -12,11 +12,11 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 
 const getUserById = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail(() => next(new NotFoundError('NotFound')))
+    .orFail(() => next(new NotFoundError(ERROR_MESSAGE.USER_NOT_FOUND)))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        return next(new BadRequestError('Некорректные данные'));
+        return next(new BadRequestError(ERROR_MESSAGE.INVALID_DATA_PROFILE));
       }
       return next(err);
     });
@@ -41,14 +41,12 @@ const createUser = (req, res, next) => {
     .catch((err) => {
       if (err.code === 11000) {
         return next(
-          new ConflictError('Пользователь с таким email уже существует'),
+          new ConflictError(ERROR_MESSAGE.EMAIL_CONFLICT),
         );
       }
       if (err instanceof mongoose.Error.ValidationError) {
         return next(
-          new BadRequestError(
-            'Некорректные данные при создании пользователя',
-          ),
+          new BadRequestError(ERROR_MESSAGE.INVALID_DATA_PROFILE),
         );
       }
       return next(err);
@@ -62,14 +60,12 @@ const updateUser = (req, res, next) => {
     { name, email },
     { new: true, runValidators: true },
   )
-    .orFail(() => next(new NotFoundError('NotFound')))
+    .orFail(() => next(new NotFoundError(ERROR_MESSAGE.USER_NOT_FOUND)))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
         return next(
-          new BadRequestError(
-            'Некорректные данные при обновлении профиля',
-          ),
+          new BadRequestError(ERROR_MESSAGE.INVALID_DATA_PROFILE),
         );
       }
       return next(err);
