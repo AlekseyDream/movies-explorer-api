@@ -1,32 +1,24 @@
 const jwt = require('jsonwebtoken');
-const { jwtKey } = require('../utils/config');
-const { ERROR_MESSAGE } = require('../utils/constants');
-const UnauthorizedError = require('../errors/UnauthorizedError');
+const AuthError = require('../errors/401');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-module.exports = (req, res, next) => {
+const auth = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    next(new UnauthorizedError(ERROR_MESSAGE.INVALID_EMAIL_OR_PASSWORD));
-    return;
+    return next(new AuthError('Необходимо авторизоваться.'));
   }
-
-  const token = authorization.replace('Bearer ', '');
+  const token = authorization.split('Bearer ')[1];
   let payload;
-
   try {
-    payload = jwt.verify(
-      token,
-      NODE_ENV === 'production' ? JWT_SECRET : jwtKey,
-    );
+    payload = jwt.verify(token, process.env.NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret');
   } catch (err) {
-    next(new UnauthorizedError(ERROR_MESSAGE.INVALID_EMAIL_OR_PASSWORD));
-    return;
+    return next(new AuthError('Необходимо авторизоваться.'));
   }
 
   req.user = payload;
-
-  next();
+  return next();
 };
+
+module.exports = auth;
