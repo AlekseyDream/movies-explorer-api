@@ -1,4 +1,6 @@
 const allowedCors = [
+  'https://dream.movie.nomoreparties.co',
+  'http://dream.movie.nomoreparties.co',
   'https://api.dream.movie.nomoreparties.co',
   'http://api.dream.movie.nomoreparties.co',
   'https://localhost:3000',
