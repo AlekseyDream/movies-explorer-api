@@ -11,8 +11,8 @@ module.exports = {
 };
 
 module.exports.limiterSetting = {
-  windowMs: 5 * 60 * 1000,
-  max: 500,
+  windowMs: 10000,
+  max: 300,
   standardHeaders: true,
   legacyHeaders: false,
 };
