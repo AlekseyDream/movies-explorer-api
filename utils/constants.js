@@ -9,8 +9,3 @@ module.exports = {
   errCodeDefault,
   defaultErrorMessage,
 };
-
-module.exports.limiterSetting = {
-  windowMs: 5 * 60 * 1000,
-  max: 300,
-};
